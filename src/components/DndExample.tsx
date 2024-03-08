@@ -1,0 +1,240 @@
+"use client";
+
+import { cardsData } from "@/bin/CardsData";
+import { useEffect, useState } from "react";
+import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
+import LoadingSkeleton from "./LoadingSkeleton";
+import { DndContext } from "@/context/DndContext";
+interface Cards {
+  id: number;
+  title: string;
+  components: {
+    id: number;
+    name: string;
+    description?: string; // Add description property if it doesn't exist
+  }[];
+}
+
+const TaskDetailsPopup = ({ task, onClose, onEdit, onDelete }) => {
+  const [editedName, setEditedName] = useState(task.name);
+  const [editedDescription, setEditedDescription] = useState(
+    task.description || ""
+  ); // Use task.description or empty string if it doesn't exist
+
+  const handleSave = () => {
+    onEdit(task.id, editedName, editedDescription);
+    onClose();
+  };
+
+  return (
+    <div className="task-details-popup bg-gray-300 text-black w-1/4 mx-auto p-3 rounded-md">
+      <h2 className="text-center">{`Task Name - ${editedName} / Task id -${task.id}`}</h2>
+
+      <hr />
+
+      <div className="my-2 flex   justify-between">
+        <label>Name:</label>
+        <input
+          type="text"
+          value={editedName}
+          onChange={(e) => setEditedName(e.target.value)}
+          className="border-2 text-center"
+        />
+      </div>
+      <div className="my-2 flex justify-between items-center">
+        <label>Description:</label>
+        <textarea
+          value={editedDescription}
+          onChange={(e) => setEditedDescription(e.target.value)}
+          className="border-2"
+        />
+      </div>
+      <hr />
+      <div className="flex justify-evenly mt-2">
+      <button className="bg-green-600 p-1 rounded-lg" onClick={handleSave}>Save Changes</button>
+      <button className="bg-red-600 p-1 rounded-lg" onClick={() => onDelete(task.id)}>Delete Task</button>
+      <button className="bg-orange-300 p-1 rounded-lg" onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+};
+
+const DndExample = () => {
+  const [data, setData] = useState<Cards[] | []>([]);
+  const [selectedTask, setSelectedTask] = useState<
+    Cards["components"][0] | null
+  >(null);
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+    if (!destination) return;
+    if (source.droppableId !== destination.droppableId) {
+        const newData = [...JSON.parse(JSON.stringify(data))];//shallow copy concept
+        const oldDroppableIndex = newData.findIndex(x => x.id == source.droppableId.split("droppable")[1]);
+        const newDroppableIndex = newData.findIndex(x => x.id == destination.droppableId.split("droppable")[1])
+        const [item] = newData[oldDroppableIndex].components.splice(source.index, 1);
+        newData[newDroppableIndex].components.splice(destination.index, 0, item);
+        setData([...newData]);
+    } else {
+        const newData = [...JSON.parse(JSON.stringify(data))];//shallow copy concept
+        const droppableIndex = newData.findIndex(x => x.id == source.droppableId.split("droppable")[1]);
+        const [item] = newData[droppableIndex].components.splice(source.index, 1);
+        newData[droppableIndex].components.splice(destination.index, 0, item);
+        setData([...newData]);
+    }
+};
+
+  useEffect(() => {
+    setData(cardsData);
+  }, []);
+
+  if (!data.length) {
+    return <LoadingSkeleton />;
+  }
+
+  const handleAddTask = async (containerIndex: number) => {
+    const newData = [...JSON.parse(JSON.stringify(data))];
+
+    const taskTitle = prompt("Enter the task title:");
+
+    if (taskTitle) {
+      const newTask = {
+        id: Math.floor(Math.random() * 1000),
+        name: taskTitle,
+      };
+
+      newData[containerIndex].components.push(newTask);
+      setData([...newData]);
+    }
+  };
+
+  const handleTaskClick = (task: Cards["components"][0]) => {
+    setSelectedTask(task);
+  };
+
+  const handleEditTask = (
+    taskId: number,
+    editedName: string,
+    editedDescription: string
+  ) => {
+    const newData = data.map((group) => ({
+      ...group,
+      components: group.components.map((task) =>
+        task.id === taskId
+          ? { ...task, name: editedName, description: editedDescription }
+          : task
+      ),
+    }));
+    setData(newData);
+    setSelectedTask(null); // Close the pop-up after editing
+  };
+
+  const handleDeleteTask = (taskId: number) => {
+    const newData = data.map((group) => ({
+      ...group,
+      components: group.components.filter((task) => task.id !== taskId),
+    }));
+    setData(newData);
+    setSelectedTask(null); // Close the pop-up after deletion
+  };
+
+  return (
+    <DndContext onDragEnd={onDragEnd}>
+      <div className="flex gap-6 justify-between my-3 mx-8 px-4 flex-col lg:flex-row py-3 mb-3">
+        {data.map((val, index) => {
+          return (
+            <Droppable key={index} droppableId={`droppable${index}`}>
+              {(provided) => (
+                <div
+                  className="p-0.5 lg:w-1/3 w-full bg-white text-black shadow-lg shadow-gray-100  border-gray-400 border border-dashed"
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  <div className="cardnav flex justify-between text-white bg-slate-900 p-2 m-1 ">
+                    <div className="left flex gap-2 justify-center">
+                      <p className="rounded-md">{val.title}</p>
+                      <p className="bg-red-300 p-1 rounded-full text-xs justify-center">
+                        {val.components.length}
+                      </p>
+                    </div>
+                    <div className="right flex justify-center gap-2">
+                      <p>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5"
+                          />
+                        </svg>
+                      </p>
+                      <p
+                        className="AddButton"
+                        onClick={() => handleAddTask(index)}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="w-6 h-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                          />
+                        </svg>
+                      </p>
+                    </div>
+                  </div>
+
+                  {val.components?.map((component, index) => (
+                    <Draggable
+                      key={component.id}
+                      draggableId={component.id.toString()}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          className="bg-orange-300 rounded-xl mx-1 px-4 py-3 my-3"
+                          {...provided.dragHandleProps}
+                          {...provided.draggableProps}
+                          ref={provided.innerRef}
+                          onClick={() => handleTaskClick(component)}
+                        >
+                          {component.name}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          );
+        })}
+      </div>
+
+      {selectedTask && (
+        <TaskDetailsPopup
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
+        />
+      )}
+
+      
+    </DndContext>
+  );
+};
+
+export default DndExample;
