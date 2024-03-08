@@ -1,6 +1,6 @@
 import DndExample from "@/components/DndExample";
 import Footer from "@/components/Footer";
-import Header from "../../Components/Header";
+import Header from "@/components/Header";
 
 
 export default function Home() {
