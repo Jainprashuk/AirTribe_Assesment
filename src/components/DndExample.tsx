@@ -15,16 +15,26 @@ interface Cards {
   }[];
 }
 
-const TaskDetailsPopup = ({ task, onClose, onEdit, onDelete }) => {
-  const [editedName, setEditedName] = useState(task.name);
-  const [editedDescription, setEditedDescription] = useState(
-    task.description || ""
-  ); // Use task.description or empty string if it doesn't exist
 
-  const handleSave = () => {
-    onEdit(task.id, editedName, editedDescription);
-    onClose();
+
+
+  const TaskDetailsPopup: React.FC<{
+    task: Cards["components"][0];
+    onClose: () => void;
+    onEdit: (taskId: number, editedName: string, editedDescription: string) => void;
+    onDelete: (taskId: number) => void;
+  }> = ({ task, onClose, onEdit, onDelete }) => {
+    // Rest of your component remains unchanged
+    const [editedName, setEditedName] = useState(task.name);
+    const [editedDescription, setEditedDescription] = useState(
+      task.description || ""
+    ); // Use task.description or empty string if it doesn't exist
+  
+    const handleSave = () => {
+      onEdit(task.id, editedName, editedDescription);
+      onClose();
   };
+  
 
   return (
     <div className="task-details-popup bg-gray-300 text-black w-1/4 mx-auto p-3 rounded-md">
