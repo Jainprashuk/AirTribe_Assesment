@@ -5,11 +5,11 @@ export const cardsData = [
     components: [
       {
         id: 100,
-        name: "material ui"
+        name: "Drag And Drop"
       },
       {
         id: 200,
-        name: "bootstrap"
+        name: "Add Task"
       },
     ]
   },
@@ -19,11 +19,11 @@ export const cardsData = [
     components: [
       {
         id: 300,
-        name: "react"
+        name: "Details Of Task"
       },
       {
         id: 400,
-        name: "node"
+        name: "Store Info In LOcal Storage"
       },
     ]
   },
@@ -33,11 +33,11 @@ export const cardsData = [
     components: [
       {
         id: 500,
-        name: "redux"
+        name: "Count Cards in Each Status"
       },
       {
         id: 600,
-        name: "recoil"
+        name: "Next.jS / Tailwind"
       },
     ]
   }
