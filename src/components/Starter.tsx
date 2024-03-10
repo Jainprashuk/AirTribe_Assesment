@@ -46,7 +46,7 @@ function Starter() {
         className="w-22 md:w-20 pb-10 mb-10 mx-auto md:pb-0 object-contain rounded-full border-white border-2"
       />
       <div className=" flex justify-center">
-        <p className="animated-text my-auto font-extrabold text-5xl">{text}</p>
+        <p className="animated-text my-auto font-extrabold text-zinc-950 text-5xl">{text}</p>
       </div>
       
     </div>

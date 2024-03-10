@@ -19,14 +19,14 @@ export default function Home() {
   }, []); // Empty dependency array ensures the effect runs only once
 
   return (
-    <main className="bg-gray-950 text-white">
+    <main className="bg-gradient-to-r from-gray-100 to-gray-300 h-screen text-white">
       {showStarter ? (
         <Starter />
       ) : (
         <>
           <Header />
           <DndExample />
-          <Footer />
+          {/* <Footer /> */}
         </>
       )}
     </main>

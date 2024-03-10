@@ -23,13 +23,13 @@ export const cardsData = [
       },
       {
         id: 400,
-        name: "Store Info In LOcal Storage"
+        name: "Store Info In Local Storage"
       },
     ]
   },
   {
     id: 2,
-    title: "Compleated",
+    title: "completed",
     components: [
       {
         id: 500,

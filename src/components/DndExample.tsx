@@ -28,7 +28,7 @@ const TaskDetailsPopup: React.FC<{
   const [editedName, setEditedName] = useState(task.name);
   const [editedDescription, setEditedDescription] = useState(
     task.description || ""
-  ); 
+  );
 
   const handleSave = () => {
     onEdit(task.id, editedName, editedDescription);
@@ -36,40 +36,49 @@ const TaskDetailsPopup: React.FC<{
   };
 
   return (
-    <div className="task-details-popup bg-gray-300 text-black w-1/4 mx-auto p-3 rounded-md">
+    <div className="task-details-popup bg-white text-black w-1/4 mx-auto p-3 rounded-md">
       <h2 className="text-center">{`Task Name - ${editedName} / Task id -${task.id}`}</h2>
 
       <hr />
 
-      <div className="my-2 flex   justify-between">
-        <label>Name:</label>
-        <input
-          type="text"
-          value={editedName}
-          onChange={(e) => setEditedName(e.target.value)}
-          className="border-2 text-center"
-        />
+      <div className="p-3">
+        <div className="my-2 flex gap-2  justify-between">
+          <label>Name:</label>
+          <input
+            type="text"
+            value={editedName}
+            onChange={(e) => setEditedName(e.target.value)}
+            className="border-2 rounded-md text-center text-gray-400"
+          />
+        </div>
+        <div className="my-2 flex justify-between gap-2 items-center">
+          <label>Description:</label>
+          <textarea
+            value={editedDescription}
+            onChange={(e) => setEditedDescription(e.target.value)}
+            className="border-2 rounded-md "
+          />
+        </div>
       </div>
-      <div className="my-2 flex justify-between items-center">
-        <label>Description:</label>
-        <textarea
-          value={editedDescription}
-          onChange={(e) => setEditedDescription(e.target.value)}
-          className="border-2"
-        />
-      </div>
+
       <hr />
       <div className="flex justify-evenly mt-2">
-        <button className="bg-green-600 p-1 rounded-lg" onClick={handleSave}>
+        <button
+          className="bg-gradient-to-l from-lime-400 to-green-300 p-1 rounded-lg"
+          onClick={handleSave}
+        >
           Save Changes
         </button>
         <button
-          className="bg-red-600 p-1 rounded-lg"
+          className="bg-gradient-to-l from-rose-400 to-rose-600 p-1 rounded-lg"
           onClick={() => onDelete(task.id)}
         >
           Delete Task
         </button>
-        <button className="bg-orange-300 p-1 rounded-lg" onClick={onClose}>
+        <button
+          className="bg-gradient-to-r from-neutral-300 to-stone-400 p-1 rounded-lg"
+          onClick={onClose}
+        >
           Close
         </button>
       </div>
@@ -78,7 +87,6 @@ const TaskDetailsPopup: React.FC<{
 };
 
 const DndExample = () => {
-
   const [data, setData] = useState<Cards[] | []>([]);
   const [selectedTask, setSelectedTask] = useState<
     Cards["components"][0] | null
@@ -100,15 +108,12 @@ const DndExample = () => {
     const storedData = getDataFromLocalStorage();
     setData(storedData.length ? storedData : []); // Remove the default assignment to cardsData
   }, []);
-  
-
-  
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
-  
+
     if (!destination) return;
-  
+
     if (source.droppableId !== destination.droppableId) {
       const newData = [...JSON.parse(JSON.stringify(data))];
       const oldDroppableIndex = newData.findIndex(
@@ -135,7 +140,6 @@ const DndExample = () => {
       saveDataToLocalStorage(newData); // Move this line inside the else block
     }
   };
-  
 
   useEffect(() => {
     // Load data from local storage when the component mounts
@@ -143,12 +147,11 @@ const DndExample = () => {
     setData(storedData.length ? storedData : cardsData);
   }, []); // Empty dependency array ensures it runs only once on mount
 
-  useEffect(() => {
-  }, []);
+  useEffect(() => {}, []);
 
-//   if (!data.length) {
-//     return <LoadingSkeleton />;
-//   }
+  //   if (!data.length) {
+  //     return <LoadingSkeleton />;
+  //   }
 
   const handleAddTask = async (containerIndex: number) => {
     const newData = [...JSON.parse(JSON.stringify(data))];
@@ -199,6 +202,47 @@ const DndExample = () => {
     setSelectedTask(null); // Close the pop-up after deletion
   };
 
+  // const handleAddTask = async (containerIndex: number) => {
+  //   const newData = [...JSON.parse(JSON.stringify(data))];
+
+  //   const taskTitle = prompt("Enter the task title:");
+
+  //   if (taskTitle) {
+  //     const newTask = {
+  //       id: Math.floor(Math.random() * 1000),
+  //       name: taskTitle,
+  //     };
+
+  //     newData[containerIndex].components.push(newTask);
+  //     setData([...newData]);
+  //     saveDataToLocalStorage(newData);
+  //   }
+  // };
+
+  const handleInputKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    containerIndex: number
+  ) => {
+    if (e.key === "Enter") {
+      const taskTitle = e.currentTarget.value;
+
+      if (taskTitle) {
+        const newData = [...JSON.parse(JSON.stringify(data))];
+        const newTask = {
+          id: Math.floor(Math.random() * 1000),
+          name: taskTitle,
+        };
+
+        newData[containerIndex].components.push(newTask);
+        setData([...newData]);
+        saveDataToLocalStorage(newData);
+
+        // Clear the input field
+        e.currentTarget.value = "";
+      }
+    }
+  };
+
   return (
     <DndContext onDragEnd={onDragEnd}>
       <div className="flex gap-6 justify-between my-3 mx-8 px-4 flex-col lg:flex-row py-3 mb-3">
@@ -207,11 +251,11 @@ const DndExample = () => {
             <Droppable key={index} droppableId={`droppable${index}`}>
               {(provided) => (
                 <div
-                  className="p-0.5 lg:w-1/3 w-full bg-white text-black shadow-lg shadow-gray-100  border-gray-400 border border-dashed"
+                  className="p-0.5 lg:w-1/3 w-full rounded-md bg-white text-black shadow-lg shadow-gray-600  border-black bottom-2 border "
                   {...provided.droppableProps}
                   ref={provided.innerRef}
                 >
-                  <div className="cardnav flex justify-between text-white bg-slate-900 p-2 m-1 ">
+                  <div className="cardnav flex justify-between text-white bg-gradient-to-l from-gray-900 via-gray-800 to-gray-800 p-2 m-1 ">
                     <div className="left flex gap-2 justify-center">
                       <p className="rounded-md">{val.title}</p>
                       <p className="bg-red-300 p-1 rounded-full text-xs justify-center">
@@ -265,7 +309,7 @@ const DndExample = () => {
                     >
                       {(provided) => (
                         <div
-                          className="bg-orange-300 rounded-xl mx-1 px-4 py-3 my-3"
+                          className="bg-gradient-to-r from-neutral-300 to-stone-400 rounded-lg  mx-1 px-4 py-3 my-3"
                           {...provided.dragHandleProps}
                           {...provided.draggableProps}
                           ref={provided.innerRef}
@@ -276,6 +320,15 @@ const DndExample = () => {
                       )}
                     </Draggable>
                   ))}
+                  <div className=" rounded-sm  mx-1 px-4 py-3 my-3  justify-center">
+                    <input
+                      type="text"
+                      placeholder="Add a task... "
+                      onKeyPress={(e) => handleInputKeyPress(e, index)}
+                      className="border-2 rounded-full p-2 w-full text-center"
+                    />
+                    
+                  </div>
                   {provided.placeholder}
                 </div>
               )}
