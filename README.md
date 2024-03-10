@@ -46,6 +46,9 @@ A simple task manager application with the following features:
 
 4. **Card Count:**
    - Check the count of cards under each status to assess the task distribution at a glance.
+  
+### ProJect Description Vidio
+[![Task Manager Video Tutorial]([https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg](https://drive.google.com/file/d/1Y66ZLCw05dR7XpupUC5iEbAQXbohjDQc/view?usp=sharing))]([YOUR_GOOGLE_DRIVE_VIDEO_LINK](https://drive.google.com/file/d/1Ptsu4eodceHhup4DZoCGS09agaBGyVy6/view?usp=sharing))
 
 ### Live Links:
 
