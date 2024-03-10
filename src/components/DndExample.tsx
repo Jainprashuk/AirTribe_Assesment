@@ -3,7 +3,7 @@
 import { cardsData } from "@/bin/CardsData";
 import { useEffect, useState } from "react";
 import { Draggable, DropResult, Droppable } from "react-beautiful-dnd";
-import LoadingSkeleton from "./LoadingSkeleton";
+// import LoadingSkeleton from "./LoadingSkeleton";
 import { DndContext } from "@/context/DndContext";
 interface Cards {
   id: number;
@@ -15,26 +15,25 @@ interface Cards {
   }[];
 }
 
+const TaskDetailsPopup: React.FC<{
+  task: Cards["components"][0];
+  onClose: () => void;
+  onEdit: (
+    taskId: number,
+    editedName: string,
+    editedDescription: string
+  ) => void;
+  onDelete: (taskId: number) => void;
+}> = ({ task, onClose, onEdit, onDelete }) => {
+  const [editedName, setEditedName] = useState(task.name);
+  const [editedDescription, setEditedDescription] = useState(
+    task.description || ""
+  ); 
 
-
-
-  const TaskDetailsPopup: React.FC<{
-    task: Cards["components"][0];
-    onClose: () => void;
-    onEdit: (taskId: number, editedName: string, editedDescription: string) => void;
-    onDelete: (taskId: number) => void;
-  }> = ({ task, onClose, onEdit, onDelete }) => {
-    // Rest of your component remains unchanged
-    const [editedName, setEditedName] = useState(task.name);
-    const [editedDescription, setEditedDescription] = useState(
-      task.description || ""
-    ); // Use task.description or empty string if it doesn't exist
-  
-    const handleSave = () => {
-      onEdit(task.id, editedName, editedDescription);
-      onClose();
+  const handleSave = () => {
+    onEdit(task.id, editedName, editedDescription);
+    onClose();
   };
-  
 
   return (
     <div className="task-details-popup bg-gray-300 text-black w-1/4 mx-auto p-3 rounded-md">
@@ -61,46 +60,95 @@ interface Cards {
       </div>
       <hr />
       <div className="flex justify-evenly mt-2">
-      <button className="bg-green-600 p-1 rounded-lg" onClick={handleSave}>Save Changes</button>
-      <button className="bg-red-600 p-1 rounded-lg" onClick={() => onDelete(task.id)}>Delete Task</button>
-      <button className="bg-orange-300 p-1 rounded-lg" onClick={onClose}>Close</button>
+        <button className="bg-green-600 p-1 rounded-lg" onClick={handleSave}>
+          Save Changes
+        </button>
+        <button
+          className="bg-red-600 p-1 rounded-lg"
+          onClick={() => onDelete(task.id)}
+        >
+          Delete Task
+        </button>
+        <button className="bg-orange-300 p-1 rounded-lg" onClick={onClose}>
+          Close
+        </button>
       </div>
     </div>
   );
 };
 
 const DndExample = () => {
+
   const [data, setData] = useState<Cards[] | []>([]);
   const [selectedTask, setSelectedTask] = useState<
     Cards["components"][0] | null
   >(null);
 
-  const onDragEnd = (result: DropResult) => {
-    const { source, destination } = result;
-    if (!destination) return;
-    if (source.droppableId !== destination.droppableId) {
-        const newData = [...JSON.parse(JSON.stringify(data))];//shallow copy concept
-        const oldDroppableIndex = newData.findIndex(x => x.id == source.droppableId.split("droppable")[1]);
-        const newDroppableIndex = newData.findIndex(x => x.id == destination.droppableId.split("droppable")[1])
-        const [item] = newData[oldDroppableIndex].components.splice(source.index, 1);
-        newData[newDroppableIndex].components.splice(destination.index, 0, item);
-        setData([...newData]);
-    } else {
-        const newData = [...JSON.parse(JSON.stringify(data))];//shallow copy concept
-        const droppableIndex = newData.findIndex(x => x.id == source.droppableId.split("droppable")[1]);
-        const [item] = newData[droppableIndex].components.splice(source.index, 1);
-        newData[droppableIndex].components.splice(destination.index, 0, item);
-        setData([...newData]);
-    }
-};
+  // Function to save data to local storage
+  const saveDataToLocalStorage = (data: Cards[] | []) => {
+    localStorage.setItem("dndData", JSON.stringify(data));
+  };
+
+  // Function to get data from local storage
+  const getDataFromLocalStorage = () => {
+    const storedData = localStorage.getItem("dndData");
+    return storedData ? JSON.parse(storedData) : [];
+  };
 
   useEffect(() => {
-    setData(cardsData);
+    // Load data from local storage when the component mounts
+    const storedData = getDataFromLocalStorage();
+    setData(storedData.length ? storedData : []); // Remove the default assignment to cardsData
+  }, []);
+  
+
+  
+
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination } = result;
+  
+    if (!destination) return;
+  
+    if (source.droppableId !== destination.droppableId) {
+      const newData = [...JSON.parse(JSON.stringify(data))];
+      const oldDroppableIndex = newData.findIndex(
+        (x) => x.id == source.droppableId.split("droppable")[1]
+      );
+      const newDroppableIndex = newData.findIndex(
+        (x) => x.id == destination.droppableId.split("droppable")[1]
+      );
+      const [item] = newData[oldDroppableIndex].components.splice(
+        source.index,
+        1
+      );
+      newData[newDroppableIndex].components.splice(destination.index, 0, item);
+      setData([...newData]);
+      saveDataToLocalStorage(newData); // Move this line inside the if block
+    } else {
+      const newData = [...JSON.parse(JSON.stringify(data))];
+      const droppableIndex = newData.findIndex(
+        (x) => x.id == source.droppableId.split("droppable")[1]
+      );
+      const [item] = newData[droppableIndex].components.splice(source.index, 1);
+      newData[droppableIndex].components.splice(destination.index, 0, item);
+      setData([...newData]);
+      saveDataToLocalStorage(newData); // Move this line inside the else block
+    }
+  };
+  
+
+  useEffect(() => {
+    // Load data from local storage when the component mounts
+    const storedData = getDataFromLocalStorage();
+    setData(storedData.length ? storedData : cardsData);
+  }, []); // Empty dependency array ensures it runs only once on mount
+
+  useEffect(() => {
   }, []);
 
-  if (!data.length) {
-    return <LoadingSkeleton />;
-  }
+//   if (!data.length) {
+//     return <LoadingSkeleton />;
+//   }
 
   const handleAddTask = async (containerIndex: number) => {
     const newData = [...JSON.parse(JSON.stringify(data))];
@@ -116,6 +164,7 @@ const DndExample = () => {
       newData[containerIndex].components.push(newTask);
       setData([...newData]);
     }
+    saveDataToLocalStorage(newData);
   };
 
   const handleTaskClick = (task: Cards["components"][0]) => {
@@ -136,6 +185,7 @@ const DndExample = () => {
       ),
     }));
     setData(newData);
+    saveDataToLocalStorage(newData);
     setSelectedTask(null); // Close the pop-up after editing
   };
 
@@ -145,6 +195,7 @@ const DndExample = () => {
       components: group.components.filter((task) => task.id !== taskId),
     }));
     setData(newData);
+    saveDataToLocalStorage(newData);
     setSelectedTask(null); // Close the pop-up after deletion
   };
 
@@ -241,8 +292,6 @@ const DndExample = () => {
           onDelete={handleDeleteTask}
         />
       )}
-
-      
     </DndContext>
   );
 };

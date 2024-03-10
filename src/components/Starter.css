@@ -1,0 +1,20 @@
+.animated-text {
+    display: inline-block;
+    overflow: hidden;
+  }
+  
+  /* Optional: Add some styling to enhance the appearance */
+  .animated-text::after {
+    content: ''; /* Blinking cursor effect */
+    animation: blinkCursor 0.7s infinite;
+  }
+  
+  @keyframes blinkCursor {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0;
+    }
+  }
+  
